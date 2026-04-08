@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import type { User } from 'firebase/auth';
+import { auth } from './firebase';
 import { getAllWords, addWords } from './data/vocabulary';
 import type { VocabWord } from './data/vocabulary';
 import { getDefaultVocabulary, getTransliteration } from './data/anki-deck';
+import { syncFromCloud, triggerSync } from './data/sync';
 import Dashboard from './components/Dashboard';
 import ImportView from './components/ImportView';
 import Settings from './components/Settings';
@@ -12,6 +16,7 @@ import SentencePuzzle from './modes/games/SentencePuzzle';
 import StoryMode from './modes/stories/StoryMode';
 import ChatMode from './modes/chat/ChatMode';
 import SwearMode from './modes/games/SwearMode';
+import AuthButton from './components/AuthButton';
 import { getApiKey } from './ai/client';
 import { checkPendingRankUp } from './data/ranks';
 import type { Rank } from './data/ranks';
@@ -34,15 +39,40 @@ function App() {
   const [words, setWords] = useState<VocabWord[]>([]);
   const [hasApiKey, setHasApiKey] = useState(false);
   const [rankUp, setRankUp] = useState<Rank | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [syncing, setSyncing] = useState(false);
 
-  const refreshWords = async () => {
+  const refreshWords = useCallback(async () => {
     const all = await getAllWords();
     setWords(all);
-    // Check for pending rank up notifications
     const pending = checkPendingRankUp();
     if (pending) setRankUp(pending);
-  };
+    // Trigger cloud sync if logged in
+    if (user) {
+      setSyncing(true);
+      triggerSync(user.uid);
+      setTimeout(() => setSyncing(false), 3000);
+    }
+  }, [user]);
 
+  // Auth state listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        // Sync from cloud on login
+        setSyncing(true);
+        await syncFromCloud(firebaseUser.uid);
+        // Refresh local state after sync
+        const all = await getAllWords();
+        setWords(all);
+        setSyncing(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Initial load
   useEffect(() => {
     const init = async () => {
       const existing = await getAllWords();
@@ -51,7 +81,6 @@ function App() {
         await addWords(defaults);
         setWords(defaults);
       } else {
-        // Backfill transliterations if missing
         const needsUpdate = existing.some(w => !w.transliteration);
         if (needsUpdate) {
           const updated = existing.map(w => {
@@ -101,10 +130,8 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#1a0a0a]">
-      {/* Rank Up Modal */}
       {rankUp && <RankUpModal rank={rankUp} onClose={() => setRankUp(null)} />}
 
-      {/* Header */}
       <header className="bg-soviet-700 border-b-4 border-gold-500 sticky top-0 z-50 shadow-lg">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <button
@@ -116,7 +143,7 @@ function App() {
               Soviet Transformer
             </span>
           </button>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             {view !== 'dashboard' && (
               <button
                 onClick={() => setView('dashboard')}
@@ -137,11 +164,11 @@ function App() {
             >
               Einstellungen
             </button>
+            <AuthButton user={user} syncing={syncing} />
           </div>
         </div>
       </header>
 
-      {/* Content */}
       <main className="max-w-4xl mx-auto px-4 py-6">
         {needsWords && view !== 'import' && view !== 'settings' ? (
           <div className="text-center py-20">
