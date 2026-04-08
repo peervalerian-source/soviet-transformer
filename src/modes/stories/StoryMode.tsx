@@ -27,7 +27,13 @@ export default function StoryMode({ words: _words, onDone }: Props) {
       const practiceWords = await getPracticeWords(5);
       setStoryWords(practiceWords);
       const response = await sendMessage(storyPrompt(practiceWords, 'easy'), [{ role: 'user', content: 'Erstelle eine Geschichte.' }]);
-      const parsed = JSON.parse(response) as Story;
+      let parsed: Story;
+      try {
+        parsed = JSON.parse(response) as Story;
+      } catch {
+        throw new Error('Antwort konnte nicht gelesen werden. Bitte nochmal versuchen.');
+      }
+      if (!parsed.sentences?.length) throw new Error('Leere Geschichte erhalten. Bitte nochmal versuchen.');
       setStory(parsed); setAnswers(new Array(parsed.sentences.length).fill(null));
     } catch (e) { setError(e instanceof Error ? e.message : 'Unbekannter Fehler'); }
     finally { setLoading(false); }

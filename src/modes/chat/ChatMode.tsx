@@ -37,7 +37,8 @@ export default function ChatMode({ words: _words, onDone }: Props) {
       setSystemPromptText(sysPrompt);
       const firstMessage: ChatMessage = { role: 'user', content: 'Starte das Gespraech. Begruesse mich.' };
       const response = await sendMessage(sysPrompt, [firstMessage]);
-      const parsed = JSON.parse(response);
+      let parsed: { response: string; translation: string; correction?: string | null; suggestions?: string[]; suggestionsTranslation?: string[] };
+      try { parsed = JSON.parse(response); } catch { throw new Error('Antwort konnte nicht gelesen werden. Bitte nochmal versuchen.'); }
       setChat([{ role: 'assistant', russian: parsed.response, german: parsed.translation, correction: parsed.correction, suggestions: parsed.suggestions, suggestionsTranslation: parsed.suggestionsTranslation }]);
       setApiMessages([firstMessage, { role: 'assistant', content: response }]);
     } catch (e) { setError(e instanceof Error ? e.message : 'Fehler'); }
@@ -53,7 +54,8 @@ export default function ChatMode({ words: _words, onDone }: Props) {
     setApiMessages(updated); setLoading(true); setError(null);
     try {
       const response = await sendMessage(systemPromptText, updated);
-      const parsed = JSON.parse(response);
+      let parsed: { response: string; translation: string; correction?: string | null; suggestions?: string[]; suggestionsTranslation?: string[] };
+      try { parsed = JSON.parse(response); } catch { throw new Error('Antwort konnte nicht gelesen werden.'); }
       setChat(prev => [...prev, { role: 'assistant', russian: parsed.response, german: parsed.translation, correction: parsed.correction, suggestions: parsed.suggestions, suggestionsTranslation: parsed.suggestionsTranslation }]);
       setApiMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch (e) { setError(e instanceof Error ? e.message : 'Fehler'); }
