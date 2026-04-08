@@ -1,6 +1,7 @@
-import { signInWithRedirect, signOut } from 'firebase/auth';
+import { signInWithPopup, signOut } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
+import { useState } from 'react';
 
 interface Props {
   user: User | null;
@@ -8,8 +9,25 @@ interface Props {
 }
 
 export default function AuthButton({ user, syncing }: Props) {
-  const handleLogin = () => {
-    signInWithRedirect(auth, googleProvider);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async () => {
+    setError(null);
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (e: unknown) {
+      const err = e as { code?: string; message?: string };
+      console.error('Login error:', err.code, err.message);
+      if (err.code === 'auth/popup-blocked') {
+        setError('Popup blockiert - bitte Popup-Blocker deaktivieren');
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        // User closed it, no error needed
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError('Domain nicht autorisiert - Firebase Einstellungen pruefen');
+      } else {
+        setError('Login fehlgeschlagen: ' + (err.code || err.message || 'Unbekannter Fehler'));
+      }
+    }
   };
 
   const handleLogout = async () => {
@@ -40,11 +58,16 @@ export default function AuthButton({ user, syncing }: Props) {
   }
 
   return (
-    <button
-      onClick={handleLogin}
-      className="px-3 py-1.5 text-sm text-gold-400 hover:bg-soviet-800 rounded-lg transition-colors border border-gold-500/30 hover:border-gold-500"
-    >
-      Anmelden
-    </button>
+    <div className="flex items-center gap-2">
+      <button
+        onClick={handleLogin}
+        className="px-3 py-1.5 text-sm text-gold-400 hover:bg-soviet-800 rounded-lg transition-colors border border-gold-500/30 hover:border-gold-500"
+      >
+        Anmelden
+      </button>
+      {error && (
+        <span className="text-xs text-soviet-400 max-w-[200px]">{error}</span>
+      )}
+    </div>
   );
 }
