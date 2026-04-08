@@ -7,18 +7,18 @@ export interface Rank {
 }
 
 export const RANKS: Rank[] = [
-  { id: 'recruit',    name: 'Rekrut',           nameRu: 'Рекрут',          minXP: 0,     icon: '🔰' },
-  { id: 'private',    name: 'Soldat',           nameRu: 'Рядовой',         minXP: 50,    icon: '⭐' },
-  { id: 'corporal',   name: 'Gefreiter',        nameRu: 'Ефрейтор',        minXP: 150,   icon: '⭐' },
-  { id: 'sergeant',   name: 'Sergeant',         nameRu: 'Сержант',         minXP: 350,   icon: '🎖️' },
-  { id: 'starshina',  name: 'Feldwebel',        nameRu: 'Старшина',        minXP: 600,   icon: '🎖️' },
-  { id: 'lieutenant', name: 'Leutnant',         nameRu: 'Лейтенант',       minXP: 1000,  icon: '🏅' },
-  { id: 'captain',    name: 'Hauptmann',        nameRu: 'Капитан',         minXP: 1600,  icon: '🏅' },
-  { id: 'major',      name: 'Major',            nameRu: 'Майор',           minXP: 2500,  icon: '🎗️' },
-  { id: 'colonel',    name: 'Oberst',           nameRu: 'Полковник',       minXP: 4000,  icon: '🎗️' },
-  { id: 'general',    name: 'General',          nameRu: 'Генерал',         minXP: 6000,  icon: '⚔️' },
-  { id: 'marshal',    name: 'Marschall',        nameRu: 'Маршал',          minXP: 10000, icon: '🔱' },
-  { id: 'hero',       name: 'Held der Sprache', nameRu: 'Герой Языка',     minXP: 20000, icon: '🌟' },
+  { id: 'recruit',    name: 'Rekrut',           nameRu: 'Рекрут',          minXP: 0,      icon: '🔰' },
+  { id: 'private',    name: 'Soldat',           nameRu: 'Рядовой',         minXP: 200,    icon: '⭐' },
+  { id: 'corporal',   name: 'Gefreiter',        nameRu: 'Ефрейтор',        minXP: 600,    icon: '⭐' },
+  { id: 'sergeant',   name: 'Sergeant',         nameRu: 'Сержант',         minXP: 1500,   icon: '🎖️' },
+  { id: 'starshina',  name: 'Feldwebel',        nameRu: 'Старшина',        minXP: 3000,   icon: '🎖️' },
+  { id: 'lieutenant', name: 'Leutnant',         nameRu: 'Лейтенант',       minXP: 5500,   icon: '🏅' },
+  { id: 'captain',    name: 'Hauptmann',        nameRu: 'Капитан',         minXP: 9000,   icon: '🏅' },
+  { id: 'major',      name: 'Major',            nameRu: 'Майор',           minXP: 15000,  icon: '🎗️' },
+  { id: 'colonel',    name: 'Oberst',           nameRu: 'Полковник',       minXP: 25000,  icon: '🎗️' },
+  { id: 'general',    name: 'General',          nameRu: 'Генерал',         minXP: 40000,  icon: '⚔️' },
+  { id: 'marshal',    name: 'Marschall',        nameRu: 'Маршал',          minXP: 70000,  icon: '🔱' },
+  { id: 'hero',       name: 'Held der Sprache', nameRu: 'Герой Языка',     minXP: 120000, icon: '🌟' },
 ];
 
 const XP_KEY = 'russfun_xp';
