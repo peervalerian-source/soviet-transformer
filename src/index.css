@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-soviet-50: #fef2f2;
+  --color-soviet-100: #fee2e2;
+  --color-soviet-200: #fecaca;
+  --color-soviet-300: #fca5a5;
+  --color-soviet-400: #f87171;
+  --color-soviet-500: #cc0000;
+  --color-soviet-600: #b91c1c;
+  --color-soviet-700: #991b1b;
+  --color-soviet-800: #7f1d1d;
+  --color-soviet-900: #450a0a;
+
+  --color-gold-300: #fcd34d;
+  --color-gold-400: #fbbf24;
+  --color-gold-500: #d4a017;
+  --color-gold-600: #b8860b;
+
+  --color-primary-50: #fef2f2;
+  --color-primary-100: #fee2e2;
+  --color-primary-200: #fecaca;
+  --color-primary-300: #fca5a5;
+  --color-primary-400: #f87171;
+  --color-primary-500: #cc0000;
+  --color-primary-600: #b91c1c;
+  --color-primary-700: #991b1b;
+  --color-primary-800: #7f1d1d;
+  --color-primary-900: #450a0a;
+
+  --color-success-400: #4ade80;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+
+  --color-warn-400: #fbbf24;
+  --color-warn-500: #d4a017;
+
+  --color-danger-400: #f87171;
+  --color-danger-500: #ef4444;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto Condensed', 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #1a0a0a;
+  color: #fef2f2;
+}
+
+* {
+  box-sizing: border-box;
+}
