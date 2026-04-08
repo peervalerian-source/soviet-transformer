@@ -100,6 +100,9 @@ export default function SpeedRound({ words, onDone }: Props) {
         <div className="bg-soviet-900/60 rounded-lg p-8 border border-soviet-700 space-y-6">
           <div className="text-center">
             <p className="text-3xl font-bold text-gold-400">{currentWord.russian}</p>
+            {currentWord.transliteration && (
+              <p className="text-sm text-soviet-500 mt-1">({currentWord.transliteration})</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             {options.map((option, i) => (

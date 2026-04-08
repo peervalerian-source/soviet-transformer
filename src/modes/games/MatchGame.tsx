@@ -12,6 +12,7 @@ interface Props {
 interface Card {
   id: string;
   text: string;
+  hint?: string;
   wordId: string;
   type: 'russian' | 'german';
   matched: boolean;
@@ -31,7 +32,7 @@ export default function MatchGame({ words, onDone }: Props) {
     setGameWords(selected);
     const newCards: Card[] = [];
     selected.forEach(w => {
-      newCards.push({ id: `ru-${w.id}`, text: w.russian, wordId: w.id, type: 'russian', matched: false });
+      newCards.push({ id: `ru-${w.id}`, text: w.russian, hint: w.transliteration, wordId: w.id, type: 'russian', matched: false });
       newCards.push({ id: `de-${w.id}`, text: w.german, wordId: w.id, type: 'german', matched: false });
     });
     setCards(newCards.sort(() => Math.random() - 0.5));
@@ -114,8 +115,13 @@ export default function MatchGame({ words, onDone }: Props) {
                 disabled={card.matched}
                 className={`p-4 rounded-lg border-2 text-center transition-all duration-200 min-h-[70px] flex items-center justify-center ${style}`}
               >
-                <span className={`text-sm font-medium ${card.type === 'russian' ? 'text-gold-400' : 'text-soviet-200'}`}>
-                  {card.text}
+                <span className="flex flex-col items-center">
+                  <span className={`text-sm font-medium ${card.type === 'russian' ? 'text-gold-400' : 'text-soviet-200'}`}>
+                    {card.text}
+                  </span>
+                  {card.hint && (
+                    <span className="text-xs text-soviet-500 mt-0.5">({card.hint})</span>
+                  )}
                 </span>
               </button>
             );

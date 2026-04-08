@@ -2,6 +2,7 @@ export interface VocabWord {
   id: string;
   russian: string;
   german: string;
+  transliteration?: string;
   example?: string;
   tags: string[];
   mastery: 'new' | 'learning' | 'mastered';

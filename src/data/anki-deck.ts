@@ -11110,6 +11110,7 @@ export function getDefaultVocabulary(): VocabWord[] {
     id: entry.id,
     russian: entry.russian,
     german: entry.german,
+    transliteration: entry.transliteration,
     example: entry.example,
     tags: [],
     mastery: 'new' as const,

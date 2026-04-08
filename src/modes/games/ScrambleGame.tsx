@@ -97,6 +97,9 @@ export default function ScrambleGame({ words, onDone }: Props) {
         <div className="text-center">
           <p className="text-soviet-400 text-sm mb-1">Welches Wort ist das?</p>
           <p className="text-lg font-medium text-soviet-100">{word.german}</p>
+          {word.transliteration && (
+            <p className="text-sm text-soviet-500 mt-0.5">({word.transliteration})</p>
+          )}
         </div>
 
         <div className="flex gap-2 justify-center min-h-[52px] p-3 bg-soviet-800/50 rounded-lg flex-wrap">

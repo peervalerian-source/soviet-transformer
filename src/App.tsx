@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAllWords, addWords } from './data/vocabulary';
 import type { VocabWord } from './data/vocabulary';
-import { getDefaultVocabulary } from './data/anki-deck';
+import { getDefaultVocabulary, getTransliteration } from './data/anki-deck';
 import Dashboard from './components/Dashboard';
 import ImportView from './components/ImportView';
 import Settings from './components/Settings';
@@ -49,7 +49,21 @@ function App() {
         await addWords(defaults);
         setWords(defaults);
       } else {
-        setWords(existing);
+        // Backfill transliterations if missing
+        const needsUpdate = existing.some(w => !w.transliteration);
+        if (needsUpdate) {
+          const updated = existing.map(w => {
+            if (!w.transliteration) {
+              const t = getTransliteration(w.russian);
+              if (t) return { ...w, transliteration: t };
+            }
+            return w;
+          });
+          await addWords(updated);
+          setWords(updated);
+        } else {
+          setWords(existing);
+        }
       }
       setHasApiKey(!!getApiKey());
     };

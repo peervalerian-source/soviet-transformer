@@ -87,6 +87,9 @@ export default function SentencePuzzle({ words, onDone }: Props) {
         <div className="text-center">
           <p className="text-soviet-400 text-sm mb-1">Bringe die Woerter in die richtige Reihenfolge</p>
           <p className="text-lg font-medium text-soviet-100">{puzzle.word.german}</p>
+          {puzzle.word.transliteration && (
+            <p className="text-sm text-soviet-500 mt-0.5">({puzzle.word.transliteration})</p>
+          )}
         </div>
         <div className="flex gap-2 justify-center min-h-[52px] p-3 bg-soviet-800/50 rounded-lg flex-wrap">
           {placed.length === 0 ? (
