@@ -15,7 +15,8 @@ interface ChatEntry {
   suggestions?: string[]; suggestionsTranslation?: string[];
 }
 
-export default function ChatMode({ words, onDone }: Props) {
+export default function ChatMode({ words: _words, onDone }: Props) {
+  void _words;
   const [scenario, setScenario] = useState<string | null>(null);
   const [chat, setChat] = useState<ChatEntry[]>([]);
   const [apiMessages, setApiMessages] = useState<ChatMessage[]>([]);

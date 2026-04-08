@@ -18,7 +18,7 @@ export default function SpeedRound({ words, onDone }: Props) {
   const [total, setTotal] = useState(0);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [isComplete, setIsComplete] = useState(false);
-  const timerRef = useRef<number>();
+  const timerRef = useRef<number>(0);
   const usedWords = useRef<Set<string>>(new Set());
 
   const nextWord = useCallback(() => {

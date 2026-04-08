@@ -61,7 +61,7 @@ function App() {
   const renderView = () => {
     switch (view) {
       case 'dashboard':
-        return <Dashboard words={words} hasApiKey={hasApiKey} onNavigate={setView} />;
+        return <Dashboard words={words} hasApiKey={hasApiKey} onNavigate={(v) => setView(v as View)} />;
       case 'import':
         return <ImportView onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'settings':

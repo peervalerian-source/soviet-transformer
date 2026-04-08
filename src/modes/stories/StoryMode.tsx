@@ -10,7 +10,8 @@ interface Props { words: VocabWord[]; onDone: () => void; }
 interface StorySentence { russian: string; german: string; blankWord: string; options: string[]; }
 interface Story { title: string; sentences: StorySentence[]; summary: string; }
 
-export default function StoryMode({ words, onDone }: Props) {
+export default function StoryMode({ words: _words, onDone }: Props) {
+  void _words;
   const [story, setStory] = useState<Story | null>(null);
   const [currentSentence, setCurrentSentence] = useState(0);
   const [answers, setAnswers] = useState<(string | null)[]>([]);
