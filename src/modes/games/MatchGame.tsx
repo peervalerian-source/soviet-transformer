@@ -3,6 +3,7 @@ import type { VocabWord } from '../../data/vocabulary';
 import { updateWord, recordAnswer } from '../../data/vocabulary';
 import { recordStudy, recordGamePlayed } from '../../data/progress';
 import { addXP, XP_REWARDS } from '../../data/ranks';
+import { playMatch, playWrong, playComplete, flashScreen } from '../../utils/sounds';
 
 interface Props {
   words: VocabWord[];
@@ -62,6 +63,8 @@ export default function MatchGame({ words, onDone }: Props) {
       await updateWord(recordAnswer(word, true));
       recordStudy(true);
       addXP(XP_REWARDS.correctAnswer);
+      playMatch();
+      flashScreen(true);
     } else {
       setWrongPair([selected, cardId]);
       setTimeout(() => { setWrongPair([]); setSelected(null); }, 800);
@@ -69,6 +72,8 @@ export default function MatchGame({ words, onDone }: Props) {
       await updateWord(recordAnswer(word, false));
       recordStudy(false);
       addXP(XP_REWARDS.incorrectAnswer);
+      playWrong();
+      flashScreen(false);
     }
   };
 
@@ -76,6 +81,7 @@ export default function MatchGame({ words, onDone }: Props) {
   if (isComplete) {
     recordGamePlayed();
     addXP(XP_REWARDS.gameCompleted);
+    playComplete();
   }
 
   return (

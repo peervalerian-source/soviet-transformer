@@ -3,6 +3,7 @@ import type { VocabWord } from '../../data/vocabulary';
 import { updateWord, recordAnswer } from '../../data/vocabulary';
 import { recordStudy, recordGamePlayed } from '../../data/progress';
 import { addXP, XP_REWARDS } from '../../data/ranks';
+import { playCorrect, playWrong, playComplete, flashScreen } from '../../utils/sounds';
 
 interface Props {
   words: VocabWord[];
@@ -38,7 +39,7 @@ export default function SpeedRound({ words, onDone }: Props) {
     usedWords.current.clear(); nextWord();
     timerRef.current = window.setInterval(() => {
       setTimeLeft(prev => {
-        if (prev <= 1) { clearInterval(timerRef.current); setIsComplete(true); recordGamePlayed(); addXP(XP_REWARDS.gameCompleted); return 0; }
+        if (prev <= 1) { clearInterval(timerRef.current); setIsComplete(true); recordGamePlayed(); addXP(XP_REWARDS.gameCompleted); playComplete(); return 0; }
         return prev - 1;
       });
     }, 1000);
@@ -55,6 +56,8 @@ export default function SpeedRound({ words, onDone }: Props) {
     await updateWord(recordAnswer(currentWord, correct));
     recordStudy(correct);
     addXP(correct ? XP_REWARDS.correctAnswer : XP_REWARDS.incorrectAnswer);
+    if (correct) { playCorrect(); flashScreen(true); }
+    else { playWrong(); flashScreen(false); }
     setTimeout(() => { if (timeLeft > 0) nextWord(); }, 400);
   };
 

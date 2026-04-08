@@ -130,14 +130,22 @@ function App() {
     }
   };
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const navigateTo = (v: View) => {
+    setView(v);
+    setMenuOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-[#1a0a0a]">
       {rankUp && <RankUpModal rank={rankUp} onClose={() => setRankUp(null)} />}
+      <div id="game-flash" />
 
       <header className="bg-soviet-700 border-b-4 border-gold-500 sticky top-0 z-50 shadow-lg">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <button
-            onClick={() => setView('dashboard')}
+            onClick={() => navigateTo('dashboard')}
             className="flex items-center gap-2 group"
           >
             <span className="text-gold-400 text-2xl">&#9733;</span>
@@ -145,30 +153,41 @@ function App() {
               Soviet Transformer
             </span>
           </button>
-          <div className="flex items-center gap-2">
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-2">
             {view !== 'dashboard' && (
-              <button
-                onClick={() => setView('dashboard')}
-                className="px-3 py-1.5 text-sm text-soviet-100 hover:text-gold-400 hover:bg-soviet-800 rounded-lg transition-colors"
-              >
-                Zurueck
-              </button>
+              <button onClick={() => navigateTo('dashboard')} className="px-3 py-1.5 text-sm text-soviet-100 hover:text-gold-400 hover:bg-soviet-800 rounded-lg transition-colors">Zurueck</button>
             )}
-            <button
-              onClick={() => setView('import')}
-              className="px-3 py-1.5 text-sm text-soviet-100 hover:text-gold-400 hover:bg-soviet-800 rounded-lg transition-colors"
-            >
-              Import
-            </button>
-            <button
-              onClick={() => setView('settings')}
-              className="px-3 py-1.5 text-sm text-soviet-100 hover:text-gold-400 hover:bg-soviet-800 rounded-lg transition-colors"
-            >
-              Einstellungen
-            </button>
+            <button onClick={() => navigateTo('import')} className="px-3 py-1.5 text-sm text-soviet-100 hover:text-gold-400 hover:bg-soviet-800 rounded-lg transition-colors">Import</button>
+            <button onClick={() => navigateTo('settings')} className="px-3 py-1.5 text-sm text-soviet-100 hover:text-gold-400 hover:bg-soviet-800 rounded-lg transition-colors">Einstellungen</button>
             <AuthButton user={user} syncing={syncing} />
           </div>
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden flex flex-col gap-1.5 p-2"
+          >
+            <span className={`w-5 h-0.5 bg-gold-400 transition-transform ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+            <span className={`w-5 h-0.5 bg-gold-400 transition-opacity ${menuOpen ? 'opacity-0' : ''}`} />
+            <span className={`w-5 h-0.5 bg-gold-400 transition-transform ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+          </button>
         </div>
+
+        {/* Mobile dropdown */}
+        {menuOpen && (
+          <div className="md:hidden bg-soviet-800 border-t border-soviet-600 px-4 py-3 space-y-2">
+            {view !== 'dashboard' && (
+              <button onClick={() => navigateTo('dashboard')} className="block w-full text-left px-3 py-2 text-sm text-soviet-100 hover:text-gold-400 hover:bg-soviet-900 rounded-lg transition-colors">Zurueck</button>
+            )}
+            <button onClick={() => navigateTo('import')} className="block w-full text-left px-3 py-2 text-sm text-soviet-100 hover:text-gold-400 hover:bg-soviet-900 rounded-lg transition-colors">Import</button>
+            <button onClick={() => navigateTo('settings')} className="block w-full text-left px-3 py-2 text-sm text-soviet-100 hover:text-gold-400 hover:bg-soviet-900 rounded-lg transition-colors">Einstellungen</button>
+            <div className="pt-2 border-t border-soviet-700">
+              <AuthButton user={user} syncing={syncing} />
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6">

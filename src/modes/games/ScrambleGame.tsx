@@ -3,6 +3,7 @@ import type { VocabWord } from '../../data/vocabulary';
 import { updateWord, recordAnswer } from '../../data/vocabulary';
 import { recordStudy, recordGamePlayed } from '../../data/progress';
 import { addXP, XP_REWARDS } from '../../data/ranks';
+import { playCorrect, playWrong, playComplete, flashScreen } from '../../utils/sounds';
 
 interface Props {
   words: VocabWord[];
@@ -61,11 +62,13 @@ export default function ScrambleGame({ words, onDone }: Props) {
     await updateWord(recordAnswer(word, correct));
     recordStudy(correct);
     addXP(correct ? XP_REWARDS.correctAnswer : XP_REWARDS.incorrectAnswer);
+    if (correct) { playCorrect(); flashScreen(true); }
+    else { playWrong(); flashScreen(false); }
   };
 
   const handleNext = () => {
     const next = currentIdx + 1;
-    if (next >= gameWords.length) { recordGamePlayed(); addXP(XP_REWARDS.gameCompleted); setCurrentIdx(next); }
+    if (next >= gameWords.length) { recordGamePlayed(); addXP(XP_REWARDS.gameCompleted); playComplete(); setCurrentIdx(next); }
     else { setCurrentIdx(next); loadWord(gameWords[next]); }
   };
 
