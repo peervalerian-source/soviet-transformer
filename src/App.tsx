@@ -11,6 +11,7 @@ import SpeedRound from './modes/games/SpeedRound';
 import SentencePuzzle from './modes/games/SentencePuzzle';
 import StoryMode from './modes/stories/StoryMode';
 import ChatMode from './modes/chat/ChatMode';
+import SwearMode from './modes/games/SwearMode';
 import { getApiKey } from './ai/client';
 import { checkPendingRankUp } from './data/ranks';
 import type { Rank } from './data/ranks';
@@ -25,7 +26,8 @@ type View =
   | 'speed'
   | 'sentence'
   | 'story'
-  | 'chat';
+  | 'chat'
+  | 'swear';
 
 function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -92,6 +94,8 @@ function App() {
         return <StoryMode words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'chat':
         return <ChatMode words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+      case 'swear':
+        return <SwearMode onDone={() => setView('dashboard')} />;
     }
   };
 

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { VocabWord } from '../data/vocabulary';
 import { getTodayStats, getStreak, getWeeklyStats } from '../data/progress';
 import RankBadge from './RankBadge';
@@ -137,6 +138,34 @@ export default function Dashboard({ words, hasApiKey, onNavigate }: Props) {
           })}
         </div>
       </div>
+
+      {/* Easteregg */}
+      <EasterEgg onActivate={() => onNavigate('swear')} />
+    </div>
+  );
+}
+
+function EasterEgg({ onActivate }: { onActivate: () => void }) {
+  const [clicks, setClicks] = useState(0);
+
+  const handleClick = () => {
+    const next = clicks + 1;
+    setClicks(next);
+    if (next >= 3) {
+      setClicks(0);
+      onActivate();
+    }
+  };
+
+  return (
+    <div className="text-center py-4">
+      <span
+        onClick={handleClick}
+        className="text-soviet-900/30 text-xs cursor-default select-none hover:text-soviet-800/40 transition-colors"
+        title=""
+      >
+        blyat
+      </span>
     </div>
   );
 }
