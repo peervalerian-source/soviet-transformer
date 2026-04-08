@@ -5,7 +5,7 @@ import { auth } from './firebase';
 import { getAllWords, addWords } from './data/vocabulary';
 import type { VocabWord } from './data/vocabulary';
 import { getDefaultVocabulary, getTransliteration } from './data/anki-deck';
-import { syncFromCloud, triggerSync } from './data/sync';
+import { syncFromCloud, triggerSync, forceSyncToCloud } from './data/sync';
 import Dashboard from './components/Dashboard';
 import ImportView from './components/ImportView';
 import Settings from './components/Settings';
@@ -60,12 +60,14 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
-        // Sync from cloud on login
         setSyncing(true);
+        // First: download cloud data and merge
         await syncFromCloud(firebaseUser.uid);
-        // Refresh local state after sync
+        // Refresh local state after merge
         const all = await getAllWords();
         setWords(all);
+        // Then: upload merged state back to cloud (so both sides are in sync)
+        await forceSyncToCloud(firebaseUser.uid);
         setSyncing(false);
       }
     });
