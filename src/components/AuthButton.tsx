@@ -10,23 +10,21 @@ interface Props {
 
 export default function AuthButton({ user, syncing }: Props) {
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     setError(null);
+    setLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (e: unknown) {
       const err = e as { code?: string; message?: string };
       console.error('Login error:', err.code, err.message);
-      if (err.code === 'auth/popup-blocked') {
-        setError('Popup blockiert - bitte Popup-Blocker deaktivieren');
-      } else if (err.code === 'auth/popup-closed-by-user') {
-        // User closed it, no error needed
-      } else if (err.code === 'auth/unauthorized-domain') {
-        setError('Domain nicht autorisiert - Firebase Einstellungen pruefen');
-      } else {
-        setError('Login fehlgeschlagen: ' + (err.code || err.message || 'Unbekannter Fehler'));
+      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+        setError(err.code || 'Fehler');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,15 +56,16 @@ export default function AuthButton({ user, syncing }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col items-end gap-1">
       <button
         onClick={handleLogin}
-        className="px-3 py-1.5 text-sm text-gold-400 hover:bg-soviet-800 rounded-lg transition-colors border border-gold-500/30 hover:border-gold-500"
+        disabled={loading}
+        className="px-3 py-1.5 text-sm text-gold-400 hover:bg-soviet-800 rounded-lg transition-colors border border-gold-500/30 hover:border-gold-500 disabled:opacity-50"
       >
-        Anmelden
+        {loading ? 'Laden...' : 'Anmelden'}
       </button>
       {error && (
-        <span className="text-xs text-soviet-400 max-w-[200px]">{error}</span>
+        <span className="text-xs text-soviet-400">{error}</span>
       )}
     </div>
   );
