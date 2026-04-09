@@ -19,6 +19,7 @@ import ChatMode from './modes/chat/ChatMode';
 import SwearMode from './modes/games/SwearMode';
 import ReviewMode from './modes/games/ReviewMode';
 import FastPaceMode from './modes/games/FastPaceMode';
+import FlashcardMode from './modes/games/FlashcardMode';
 import AuthButton from './components/AuthButton';
 import { getApiKey } from './ai/client';
 import { checkPendingRankUp } from './data/ranks';
@@ -37,6 +38,7 @@ type View =
   | 'chat'
   | 'swear'
   | 'review'
+  | 'flashcard'
   | 'fastpace';
 
 function App() {
@@ -148,6 +150,8 @@ function App() {
         return <ChatMode words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'review':
         return <ReviewMode words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+      case 'flashcard':
+        return <FlashcardMode words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'fastpace':
         return <FastPaceMode words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'swear':
