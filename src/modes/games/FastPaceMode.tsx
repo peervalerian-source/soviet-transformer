@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import type { VocabWord } from '../../data/vocabulary';
-import { getFilteredWords, updateWord, recordAnswer } from '../../data/vocabulary';
-import { getFastPaceRussianSet, FAST_PACE_DATA } from '../../data/fast-pace-deck';
+import { updateWord, recordAnswer, getAllWords } from '../../data/vocabulary';
+import { getFastPaceIds, FAST_PACE_DATA } from '../../data/fast-pace-deck';
 import { recordStudy, recordGamePlayed } from '../../data/progress';
 import { addXP, XP_REWARDS } from '../../data/ranks';
 import { playCorrect, playWrong, playComplete, flashScreen } from '../../utils/sounds';
@@ -21,42 +21,27 @@ interface Question {
   options: string[];
 }
 
-export default function FastPaceMode({ words: _words, onDone }: Props) {
-  void _words;
-  const [loading, setLoading] = useState(true);
-  const [fpWords, setFpWords] = useState<VocabWord[]>([]);
-  const [questions, setQuestions] = useState<Question[]>([]);
+export default function FastPaceMode({ words, onDone }: Props) {
+  // Always use FP words from the DB, regardless of global filter state
+  const fpIds = getFastPaceIds();
+  const [fpWords, setFpWords] = useState<VocabWord[]>(() => words.filter(w => fpIds.has(w.id)));
+  const [questions, setQuestions] = useState<Question[]>(() => buildQs(words.filter(w => fpIds.has(w.id))));
   const [currentIdx, setCurrentIdx] = useState(0);
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
-  const questionCount = useRef(15);
 
-  useEffect(() => {
-    const load = async () => {
-      const russianSet = getFastPaceRussianSet();
-      const filtered = await getFilteredWords(russianSet);
-      setFpWords(filtered);
-      if (filtered.length >= 4) {
-        buildQuestions(filtered);
-      }
-      setLoading(false);
-    };
-    load();
-  }, []);
-
-  const buildQuestions = useCallback((pool: VocabWord[]) => {
-    const count = Math.min(questionCount.current, pool.length);
+  function buildQs(pool: VocabWord[]): Question[] {
+    const count = Math.min(15, pool.length);
     const shuffled = [...pool].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, count);
 
-    const qs: Question[] = selected.map(word => {
+    return selected.map(word => {
       const direction: Direction = Math.random() < 0.5 ? 'ru-de' : 'de-ru';
       const prompt = direction === 'ru-de' ? word.russian : word.german;
       const correctAnswer = direction === 'ru-de' ? word.german : word.russian;
 
-      // Use Fast Pace deck for wrong options to stay in the same vocabulary scope
       const fpOthers = FAST_PACE_DATA.filter(e => e.russian !== word.russian);
       const wrongFp = fpOthers.sort(() => Math.random() - 0.5).slice(0, 3);
       const wrongOptions = wrongFp.map(e => direction === 'ru-de' ? e.german : e.russian);
@@ -64,14 +49,20 @@ export default function FastPaceMode({ words: _words, onDone }: Props) {
 
       return { word, direction, prompt, correctAnswer, options };
     });
+  }
 
-    setQuestions(qs);
+  const restart = useCallback(async () => {
+    // Re-fetch from DB for updated mastery
+    const all = await getAllWords();
+    const fresh = all.filter(w => fpIds.has(w.id));
+    setFpWords(fresh);
+    setQuestions(buildQs(fresh));
     setCurrentIdx(0);
     setScore(0);
     setIsComplete(false);
     setFeedback(null);
     setSelectedAnswer(null);
-  }, []);
+  }, [fpIds]);
 
   const handleAnswer = async (answer: string) => {
     if (feedback) return;
@@ -102,29 +93,12 @@ export default function FastPaceMode({ words: _words, onDone }: Props) {
     }, 800);
   };
 
-  const restart = () => {
-    if (fpWords.length >= 4) {
-      buildQuestions(fpWords);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="max-w-lg mx-auto text-center py-12">
-        <p className="text-soviet-300">Lade Fast Pace Vokabeln...</p>
-      </div>
-    );
-  }
-
   if (fpWords.length < 4) {
     return (
       <div className="max-w-lg mx-auto text-center py-12 space-y-4">
         <p className="text-gold-400 text-5xl">&#9888;</p>
         <h3 className="font-['Oswald'] text-xl font-bold text-soviet-100 uppercase">Fast Pace nicht verfuegbar</h3>
-        <p className="text-soviet-300">
-          Nicht genuegend Woerter aus dem Fast Pace Deck im Hauptwortschatz gefunden.
-          ({fpWords.length} von {FAST_PACE_DATA.length} gefunden)
-        </p>
+        <p className="text-soviet-300">Zu wenige Fast Pace Vokabeln gefunden ({fpWords.length}).</p>
         <button onClick={onDone} className="px-5 py-2.5 text-soviet-300 hover:bg-soviet-800 rounded-lg transition-colors mt-4">Zurueck</button>
       </div>
     );
@@ -147,6 +121,8 @@ export default function FastPaceMode({ words: _words, onDone }: Props) {
       </div>
     );
   }
+
+  if (questions.length === 0) return null;
 
   const q = questions[currentIdx];
   const dirLabel = q.direction === 'ru-de' ? 'Russisch \u2192 Deutsch' : 'Deutsch \u2192 Russisch';

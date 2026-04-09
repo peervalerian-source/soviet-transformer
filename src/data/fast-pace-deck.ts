@@ -258,6 +258,21 @@ export const FAST_PACE_DATA: FastPaceEntry[] = [
 
 // 246 entries total
 
-export function getFastPaceRussianSet(): Set<string> {
-  return new Set(FAST_PACE_DATA.map(e => e.russian.toLowerCase()));
+import type { VocabWord } from './vocabulary';
+
+export function getFastPaceVocabulary(): VocabWord[] {
+  return FAST_PACE_DATA.map(e => ({
+    id: e.id,
+    russian: e.russian,
+    german: e.german,
+    transliteration: e.transliteration,
+    tags: ['fast-pace'],
+    mastery: 'new' as const,
+    correctCount: 0,
+    incorrectCount: 0,
+  }));
+}
+
+export function getFastPaceIds(): Set<string> {
+  return new Set(FAST_PACE_DATA.map(e => e.id));
 }

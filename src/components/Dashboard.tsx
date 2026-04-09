@@ -8,9 +8,11 @@ interface Props {
   words: VocabWord[];
   hasApiKey: boolean;
   onNavigate: (view: string) => void;
+  fastPaceFilter: boolean;
+  onToggleFastPace: () => void;
 }
 
-export default function Dashboard({ words, hasApiKey, onNavigate }: Props) {
+export default function Dashboard({ words, hasApiKey, onNavigate, fastPaceFilter, onToggleFastPace }: Props) {
   const todayStats = getTodayStats();
   const streak = getStreak();
   const weeklyStats = getWeeklyStats();
@@ -87,23 +89,43 @@ export default function Dashboard({ words, hasApiKey, onNavigate }: Props) {
       {/* Weekly Activity */}
       <div className="bg-soviet-900/60 rounded-lg p-6 border border-soviet-700">
         <h3 className="font-['Oswald'] font-semibold text-gold-400 mb-4 uppercase tracking-wide">Diese Woche</h3>
-        <div className="flex items-end gap-2 h-24">
+        <div className="flex items-end gap-2" style={{ height: '96px' }}>
           {weeklyStats.map((day, i) => {
-            const height = day.wordsStudied > 0 ? Math.max((day.wordsStudied / maxDaily) * 100, 8) : 4;
+            const barHeight = day.wordsStudied > 0 ? Math.max((day.wordsStudied / maxDaily) * 80, 6) : 3;
             const dayName = new Date(day.date).toLocaleDateString('de-DE', { weekday: 'short' });
             return (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              <div key={i} className="flex-1 flex flex-col items-center justify-end" style={{ height: '100%' }}>
                 <div
                   className={`w-full rounded-t transition-all duration-300 ${
                     day.wordsStudied > 0 ? 'bg-soviet-500' : 'bg-soviet-800'
                   }`}
-                  style={{ height: `${height}%` }}
+                  style={{ height: `${barHeight}px` }}
                 />
-                <span className="text-xs text-soviet-400">{dayName}</span>
+                <span className="text-xs text-soviet-400 mt-1">{dayName}</span>
               </div>
             );
           })}
         </div>
+      </div>
+
+      {/* Fast Pace Filter Toggle */}
+      <div className="bg-soviet-900/60 rounded-lg p-4 border border-soviet-700 flex items-center justify-between">
+        <div>
+          <h3 className="font-['Oswald'] font-semibold text-gold-400 uppercase tracking-wide text-sm">Fast Pace Filter</h3>
+          <p className="text-soviet-400 text-xs mt-0.5">
+            {fastPaceFilter ? `Aktiv — nur ${words.length} Survival-Vokabeln` : 'Aus — alle Vokabeln aktiv'}
+          </p>
+        </div>
+        <button
+          onClick={onToggleFastPace}
+          className={`relative w-14 h-7 rounded-full transition-colors duration-200 ${
+            fastPaceFilter ? 'bg-gold-500' : 'bg-soviet-700'
+          }`}
+        >
+          <span className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white transition-transform duration-200 ${
+            fastPaceFilter ? 'translate-x-7' : ''
+          }`} />
+        </button>
       </div>
 
       {/* Game Modes */}

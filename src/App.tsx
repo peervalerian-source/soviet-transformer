@@ -5,6 +5,7 @@ import { auth } from './firebase';
 import { getAllWords, addWords } from './data/vocabulary';
 import type { VocabWord } from './data/vocabulary';
 import { getDefaultVocabulary, getTransliteration } from './data/anki-deck';
+import { getFastPaceVocabulary, getFastPaceIds } from './data/fast-pace-deck';
 import { syncFromCloud, triggerSync, forceSyncToCloud } from './data/sync';
 import Dashboard from './components/Dashboard';
 import ImportView from './components/ImportView';
@@ -45,6 +46,7 @@ function App() {
   const [rankUp, setRankUp] = useState<Rank | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [fastPaceFilter, setFastPaceFilter] = useState(() => localStorage.getItem('russfun_fastpace') === 'on');
 
   const refreshWords = useCallback(async () => {
     const all = await getAllWords();
@@ -81,58 +83,73 @@ function App() {
   // Initial load
   useEffect(() => {
     const init = async () => {
-      const existing = await getAllWords();
+      let existing = await getAllWords();
       if (existing.length === 0) {
         const defaults = getDefaultVocabulary();
         await addWords(defaults);
-        setWords(defaults);
+        existing = defaults;
       } else {
         const needsUpdate = existing.some(w => !w.transliteration);
         if (needsUpdate) {
-          const updated = existing.map(w => {
+          existing = existing.map(w => {
             if (!w.transliteration) {
               const t = getTransliteration(w.russian);
               if (t) return { ...w, transliteration: t };
             }
             return w;
           });
-          await addWords(updated);
-          setWords(updated);
-        } else {
-          setWords(existing);
+          await addWords(existing);
         }
       }
+      // Add Fast Pace words if not yet in DB
+      const existingIds = new Set(existing.map(w => w.id));
+      const fpWords = getFastPaceVocabulary().filter(w => !existingIds.has(w.id));
+      if (fpWords.length > 0) {
+        await addWords(fpWords);
+        existing = [...existing, ...fpWords];
+      }
+      setWords(existing);
       setHasApiKey(!!getApiKey());
     };
     init();
   }, []);
 
-  const needsWords = words.length < 4;
+  const toggleFastPace = useCallback(() => {
+    setFastPaceFilter(prev => {
+      const next = !prev;
+      localStorage.setItem('russfun_fastpace', next ? 'on' : 'off');
+      return next;
+    });
+  }, []);
+
+  const fpIds = getFastPaceIds();
+  const activeWords = fastPaceFilter ? words.filter(w => fpIds.has(w.id)) : words;
+  const needsWords = activeWords.length < 4;
 
   const renderView = () => {
     switch (view) {
       case 'dashboard':
-        return <Dashboard words={words} hasApiKey={hasApiKey} onNavigate={(v) => setView(v as View)} />;
+        return <Dashboard words={activeWords} hasApiKey={hasApiKey} onNavigate={(v) => setView(v as View)} fastPaceFilter={fastPaceFilter} onToggleFastPace={toggleFastPace} />;
       case 'import':
         return <ImportView onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'settings':
         return <Settings onApiKeyChange={() => setHasApiKey(!!getApiKey())} onBack={() => setView('dashboard')} />;
       case 'match':
-        return <MatchGame words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+        return <MatchGame words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'scramble':
-        return <ScrambleGame words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+        return <ScrambleGame words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'speed':
-        return <SpeedRound words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+        return <SpeedRound words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'sentence':
-        return <SentencePuzzle words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+        return <SentencePuzzle words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'story':
-        return <StoryMode words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+        return <StoryMode words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'chat':
-        return <ChatMode words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+        return <ChatMode words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'review':
-        return <ReviewMode words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+        return <ReviewMode words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'fastpace':
-        return <FastPaceMode words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+        return <FastPaceMode words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'swear':
         return <SwearMode onDone={() => setView('dashboard')} />;
     }
