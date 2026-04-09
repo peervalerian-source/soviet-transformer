@@ -16,6 +16,8 @@ import SentencePuzzle from './modes/games/SentencePuzzle';
 import StoryMode from './modes/stories/StoryMode';
 import ChatMode from './modes/chat/ChatMode';
 import SwearMode from './modes/games/SwearMode';
+import ReviewMode from './modes/games/ReviewMode';
+import FastPaceMode from './modes/games/FastPaceMode';
 import AuthButton from './components/AuthButton';
 import { getApiKey } from './ai/client';
 import { checkPendingRankUp } from './data/ranks';
@@ -32,7 +34,9 @@ type View =
   | 'sentence'
   | 'story'
   | 'chat'
-  | 'swear';
+  | 'swear'
+  | 'review'
+  | 'fastpace';
 
 function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -125,6 +129,10 @@ function App() {
         return <StoryMode words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'chat':
         return <ChatMode words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+      case 'review':
+        return <ReviewMode words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+      case 'fastpace':
+        return <FastPaceMode words={words} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'swear':
         return <SwearMode onDone={() => setView('dashboard')} />;
     }

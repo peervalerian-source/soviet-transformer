@@ -29,6 +29,8 @@ export default function Dashboard({ words, hasApiKey, onNavigate }: Props) {
     { id: 'scramble', name: 'Buchstaben-Salat', desc: 'Setze russische Woerter zusammen', icon: '&#9881;', needsAI: false },
     { id: 'speed', name: 'Speed-Round', desc: '60 Sekunden, so viele Woerter wie moeglich', icon: '&#9889;', needsAI: false },
     { id: 'sentence', name: 'Satz-Puzzle', desc: 'Bringe Woerter in die richtige Reihenfolge', icon: '&#9874;', needsAI: false },
+    { id: 'review', name: 'Aktive Wiederholung', desc: 'Geuebte Vokabeln in beide Richtungen', icon: '&#9851;', needsAI: false },
+    { id: 'fastpace', name: 'Fast Pace', desc: 'Survival-Wortschatz intensiv trainieren', icon: '&#9889;&#9733;', needsAI: false },
     { id: 'story', name: 'Mini-Geschichten', desc: 'Interaktive Stories mit Lueckentexten', icon: '&#9997;', needsAI: true },
     { id: 'chat', name: 'Chat-Simulation', desc: 'Situationen auf Russisch meistern', icon: '&#9742;', needsAI: true },
   ];

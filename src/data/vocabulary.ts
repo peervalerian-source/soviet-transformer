@@ -111,6 +111,16 @@ export async function getPracticeWords(count: number): Promise<VocabWord[]> {
   return shuffled.slice(0, count).map(s => s.word);
 }
 
+export async function getPracticedWords(): Promise<VocabWord[]> {
+  const all = await getAllWords();
+  return all.filter(w => w.lastPracticed != null);
+}
+
+export async function getFilteredWords(russianSet: Set<string>): Promise<VocabWord[]> {
+  const all = await getAllWords();
+  return all.filter(w => russianSet.has(w.russian.toLowerCase()));
+}
+
 export function recordAnswer(word: VocabWord, correct: boolean): VocabWord {
   const updated = { ...word, lastPracticed: Date.now() };
   if (correct) {
