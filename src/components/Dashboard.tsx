@@ -10,9 +10,11 @@ interface Props {
   onNavigate: (view: string) => void;
   fastPaceFilter: boolean;
   onToggleFastPace: () => void;
+  verbFilter: boolean;
+  onToggleVerben: () => void;
 }
 
-export default function Dashboard({ words, hasApiKey, onNavigate, fastPaceFilter, onToggleFastPace }: Props) {
+export default function Dashboard({ words, hasApiKey, onNavigate, fastPaceFilter, onToggleFastPace, verbFilter, onToggleVerben }: Props) {
   const todayStats = getTodayStats();
   const streak = getStreak();
   const weeklyStats = getWeeklyStats();
@@ -33,6 +35,7 @@ export default function Dashboard({ words, hasApiKey, onNavigate, fastPaceFilter
     { id: 'sentence', name: 'Satz-Puzzle', desc: 'Bringe Woerter in die richtige Reihenfolge', icon: '&#9874;', needsAI: false },
     { id: 'review', name: 'Aktive Wiederholung', desc: 'Geuebte Vokabeln in beide Richtungen', icon: '&#9851;', needsAI: false },
     { id: 'flashcard', name: 'Karteikarten', desc: 'Spaced Repetition fuer Fast Pace', icon: '&#127183;', needsAI: false },
+    { id: 'verbtrainer', name: 'Verben Trainer', desc: 'Russische Verben konjugieren lernen', icon: '&#128218;', needsAI: false },
     { id: 'fastpace', name: 'Fast Pace', desc: 'Survival-Wortschatz intensiv trainieren', icon: '&#9889;&#9733;', needsAI: false },
     { id: 'story', name: 'Mini-Geschichten', desc: 'Interaktive Stories mit Lueckentexten', icon: '&#9997;', needsAI: true },
     { id: 'chat', name: 'Chat-Simulation', desc: 'Situationen auf Russisch meistern', icon: '&#9742;', needsAI: true },
@@ -109,24 +112,39 @@ export default function Dashboard({ words, hasApiKey, onNavigate, fastPaceFilter
         </div>
       </div>
 
-      {/* Fast Pace Filter Toggle */}
-      <div className="bg-soviet-900/60 rounded-lg p-4 border border-soviet-700 flex items-center justify-between">
-        <div>
-          <h3 className="font-['Oswald'] font-semibold text-gold-400 uppercase tracking-wide text-sm">Fast Pace Filter</h3>
-          <p className="text-soviet-400 text-xs mt-0.5">
-            {fastPaceFilter ? `Aktiv — nur ${words.length} Survival-Vokabeln` : 'Aus — alle Vokabeln aktiv'}
-          </p>
+      {/* Filter Toggles */}
+      <div className="bg-soviet-900/60 rounded-lg p-4 border border-soviet-700 space-y-3">
+        <h3 className="font-['Oswald'] font-semibold text-gold-400 uppercase tracking-wide text-sm">Wortschatz-Filter</h3>
+        {(fastPaceFilter || verbFilter) && (
+          <p className="text-soviet-400 text-xs">Aktiv: {words.length} Vokabeln</p>
+        )}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-soviet-200 text-sm font-medium">Fast Pace</p>
+            <p className="text-soviet-500 text-xs">246 Survival-Phrasen</p>
+          </div>
+          <button
+            onClick={onToggleFastPace}
+            className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${fastPaceFilter ? 'bg-gold-500' : 'bg-soviet-700'}`}
+          >
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 ${fastPaceFilter ? 'translate-x-6' : ''}`} />
+          </button>
         </div>
-        <button
-          onClick={onToggleFastPace}
-          className={`relative w-14 h-7 rounded-full transition-colors duration-200 ${
-            fastPaceFilter ? 'bg-gold-500' : 'bg-soviet-700'
-          }`}
-        >
-          <span className={`absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white transition-transform duration-200 ${
-            fastPaceFilter ? 'translate-x-7' : ''
-          }`} />
-        </button>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-soviet-200 text-sm font-medium">Verben</p>
+            <p className="text-soviet-500 text-xs">188 Verbformen mit Konjugation</p>
+          </div>
+          <button
+            onClick={onToggleVerben}
+            className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${verbFilter ? 'bg-gold-500' : 'bg-soviet-700'}`}
+          >
+            <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 ${verbFilter ? 'translate-x-6' : ''}`} />
+          </button>
+        </div>
+        {!fastPaceFilter && !verbFilter && (
+          <p className="text-soviet-500 text-xs">Kein Filter — alle Vokabeln aktiv</p>
+        )}
       </div>
 
       {/* Game Modes */}

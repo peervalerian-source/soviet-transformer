@@ -6,6 +6,7 @@ import { getAllWords, addWords } from './data/vocabulary';
 import type { VocabWord } from './data/vocabulary';
 import { getDefaultVocabulary, getTransliteration } from './data/anki-deck';
 import { getFastPaceVocabulary, getFastPaceIds } from './data/fast-pace-deck';
+import { getVerbVocabulary, getVerbIds } from './data/verb-deck';
 import { syncFromCloud, triggerSync, forceSyncToCloud } from './data/sync';
 import Dashboard from './components/Dashboard';
 import ImportView from './components/ImportView';
@@ -20,6 +21,7 @@ import SwearMode from './modes/games/SwearMode';
 import ReviewMode from './modes/games/ReviewMode';
 import FastPaceMode from './modes/games/FastPaceMode';
 import FlashcardMode from './modes/games/FlashcardMode';
+import VerbTrainerMode from './modes/games/VerbTrainerMode';
 import AuthButton from './components/AuthButton';
 import { getApiKey } from './ai/client';
 import { checkPendingRankUp } from './data/ranks';
@@ -39,7 +41,8 @@ type View =
   | 'swear'
   | 'review'
   | 'flashcard'
-  | 'fastpace';
+  | 'fastpace'
+  | 'verbtrainer';
 
 function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -49,6 +52,7 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [fastPaceFilter, setFastPaceFilter] = useState(() => localStorage.getItem('russfun_fastpace') === 'on');
+  const [verbFilter, setVerbFilter] = useState(() => localStorage.getItem('russfun_verben') === 'on');
 
   const refreshWords = useCallback(async () => {
     const all = await getAllWords();
@@ -103,12 +107,14 @@ function App() {
           await addWords(existing);
         }
       }
-      // Add Fast Pace words if not yet in DB
+      // Add Fast Pace + Verb words if not yet in DB
       const existingIds = new Set(existing.map(w => w.id));
       const fpWords = getFastPaceVocabulary().filter(w => !existingIds.has(w.id));
-      if (fpWords.length > 0) {
-        await addWords(fpWords);
-        existing = [...existing, ...fpWords];
+      const vbWords = getVerbVocabulary().filter(w => !existingIds.has(w.id));
+      const newWords = [...fpWords, ...vbWords];
+      if (newWords.length > 0) {
+        await addWords(newWords);
+        existing = [...existing, ...newWords];
       }
       setWords(existing);
       setHasApiKey(!!getApiKey());
@@ -124,14 +130,29 @@ function App() {
     });
   }, []);
 
+  const toggleVerben = useCallback(() => {
+    setVerbFilter(prev => {
+      const next = !prev;
+      localStorage.setItem('russfun_verben', next ? 'on' : 'off');
+      return next;
+    });
+  }, []);
+
   const fpIds = getFastPaceIds();
-  const activeWords = fastPaceFilter ? words.filter(w => fpIds.has(w.id)) : words;
+  const vbIds = getVerbIds();
+  const activeWords = (() => {
+    if (!fastPaceFilter && !verbFilter) return words;
+    // Combine active filters
+    return words.filter(w =>
+      (fastPaceFilter && fpIds.has(w.id)) || (verbFilter && vbIds.has(w.id))
+    );
+  })();
   const needsWords = activeWords.length < 4;
 
   const renderView = () => {
     switch (view) {
       case 'dashboard':
-        return <Dashboard words={activeWords} hasApiKey={hasApiKey} onNavigate={(v) => setView(v as View)} fastPaceFilter={fastPaceFilter} onToggleFastPace={toggleFastPace} />;
+        return <Dashboard words={activeWords} hasApiKey={hasApiKey} onNavigate={(v) => setView(v as View)} fastPaceFilter={fastPaceFilter} onToggleFastPace={toggleFastPace} verbFilter={verbFilter} onToggleVerben={toggleVerben} />;
       case 'import':
         return <ImportView onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'settings':
@@ -154,6 +175,8 @@ function App() {
         return <FlashcardMode words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'fastpace':
         return <FastPaceMode words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
+      case 'verbtrainer':
+        return <VerbTrainerMode words={activeWords} onDone={() => { refreshWords(); setView('dashboard'); }} />;
       case 'swear':
         return <SwearMode onDone={() => setView('dashboard')} />;
     }
